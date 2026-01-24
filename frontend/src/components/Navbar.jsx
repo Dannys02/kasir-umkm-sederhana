@@ -6,9 +6,17 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
 
     const menuItems = [
-        { name: "Dashboard", to: "#", icon: <LayoutDashboard size={18} /> },
-        { name: "Daftar Produk", to: "#", icon: <ShoppingBag size={18} /> },
-        { name: "Riwayat Transaksi", to: "#", icon: <History size={18} /> }
+        { name: "Dashboard", to: "/", icon: <LayoutDashboard size={18} /> },
+        {
+            name: "Daftar Produk",
+            to: "/daftar-produk",
+            icon: <ShoppingBag size={18} />
+        },
+        {
+            name: "Riwayat Transaksi",
+            to: "/riwayat-transaksi",
+            icon: <History size={18} />
+        }
     ];
 
     return (
@@ -66,6 +74,7 @@ export default function Navbar() {
                 <div className="px-4 pt-2 pb-6 space-y-1">
                     {menuItems.map(item => (
                         <Link
+                            onClick={() => setIsOpen(false)}
                             key={item.name}
                             to={item.to}
                             className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all"

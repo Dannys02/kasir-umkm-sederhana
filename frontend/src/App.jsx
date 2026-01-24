@@ -5,6 +5,8 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProductCard from "./components/ProductCard";
+import ProductList from "./components/ProductList";
+import Transaction from "./components/Transaction";
 
 function App() {
     const [count, setCount] = useState(0);
@@ -14,8 +16,8 @@ function App() {
             <Navbar />
             <Routes>
                 <Route path="/" element={<ProductCard />} />
-                <Route path="/daftar-produk" element={<ProductCard />} />
-                <Route path="/riwayat-transaksi" element={<ProductCard />} />
+                <Route path="/daftar-produk" element={<ProductList />} />
+                <Route path="/riwayat-transaksi" element={<Transaction />} />
             </Routes>
         </div>
     );
