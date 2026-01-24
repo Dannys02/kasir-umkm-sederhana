@@ -10,8 +10,32 @@ import Transaction from "./components/Transaction";
 
 function App() {
     const [transactions, setTransactions] = useState([]);
+    const [cart, setCart] = useState([]);
 
-    const [count, setCount] = useState(0);
+    const addToCart = product => {
+        setCart(prev => {
+            const isExist = prev.find(item => item.id === product.id);
+
+            if (isExist) {
+                // CEK: Apakah jumlah di keranjang sudah mentok sama stok?
+                if (isExist.qty >= product.stock) {
+                    alert("Stok tidak mencukupi!"); // Kasih peringatan
+                    return prev; // Jangan tambah apa-apa, balikin data lama
+                }
+
+                return prev.map(item =>
+                    item.id === product.id
+                        ? { ...item, qty: item.qty + 1 }
+                        : item
+                );
+            }
+
+            // Kalau barang baru masuk keranjang, pastikan stoknya minimal ada 1
+            if (product.stock <= 0) return prev;
+
+            return [...prev, { ...product, qty: 1 }];
+        });
+    };
 
     return (
         <>
@@ -25,6 +49,9 @@ function App() {
                             <ProductCard
                                 transactions={transactions}
                                 setTransactions={setTransactions}
+                                cart={cart}
+                                setCart={setCart}
+                                addToCart={addToCart}
                             />
                         }
                     />

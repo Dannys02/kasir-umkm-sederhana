@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Check, ShoppingCart, X } from "lucide-react";
 
-export default function ProductCard({ transactions, setTransactions }) {
+export default function ProductCard({
+    transactions,
+    setTransactions,
+    cart,
+    setCart,
+    addToCart
+}) {
     const [showModal, setShowModal] = useState(false);
     const [succesModal, setSuccesModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -44,19 +50,41 @@ export default function ProductCard({ transactions, setTransactions }) {
     };
 
     const handleConfirm = () => {
-        setRevenue(prev => prev + selectedProduct.price);
+        // 1. Tambah Revenue dari total keranjang
+        setRevenue(prev => prev + totalHargaKeranjang);
 
+        // 2. Buat transaksi untuk riwayat (looping isi cart)
+        const newTransactions = cart.map(item => ({
+            id: Date.now() + Math.random(),
+            product: `${item.name} (x${item.qty})`,
+            price: item.price * item.qty,
+            time: new Date().toLocaleTimeString("id-ID")
+        }));
+
+        setTransactions(prev => [...newTransactions, ...prev]);
+
+        // 3. Kurangi stok produk
         setDummyProducts(prevProducts =>
-            prevProducts.map(p =>
-                p.id === selectedProduct.id ? { ...p, stock: p.stock - 1 } : p
-            )
+            prevProducts.map(p => {
+                const itemInCart = cart.find(c => c.id === p.id);
+                return itemInCart
+                    ? { ...p, stock: p.stock - itemInCart.qty }
+                    : p;
+            })
         );
 
+        // 4. Reset Keranjang & Tutup Modal
+        setCart([]);
         setShowModal(false);
         setSuccesModal(true);
-
         setTimeout(() => setSuccesModal(false), 2000);
     };
+
+    // Hitung Total Harga Keranjang
+    const totalHargaKeranjang = cart.reduce(
+        (acc, item) => acc + item.price * item.qty,
+        0
+    );
 
     return (
         <>
@@ -80,68 +108,112 @@ export default function ProductCard({ transactions, setTransactions }) {
             </div>
 
             {/* Grid Produk */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                {dummyProducts.map(item => (
-                    <div
-                        key={item.id}
-                        className="group bg-white rounded-2xl overflow-hidden
+            <div
+                className={`grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl
+            mx-auto ${cart.length > 0 ? "pb-[88px]" : ""}`}
+            >
+                {dummyProducts.map(item => {
+                    const itemInCart = cart.find(c => c.id === item.id);
+                    const currentQtyInCart = itemInCart ? itemInCart.qty : 0;
+                    const isOutOfStock = item.stock - currentQtyInCart <= 0;
+                    return (
+                        <div
+                            key={item.id}
+                            className="group bg-white rounded-2xl overflow-hidden
                         shadow-sm border border-indigo-500 hover:shadow-xl
                         hover:-translate-y-1 transition-all duration-300"
-                    >
-                        <div className="relative aspect-square overflow-hidden bg-gray-50">
-                            <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            {item.stock <= 0 && (
-                                <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center">
-                                    <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                                        Habis
+                        >
+                            <div className="relative aspect-square overflow-hidden bg-gray-50">
+                                <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                {item.stock <= 0 && (
+                                    <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center">
+                                        <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+                                            Habis
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h2 className="text-sm font-semibold text-gray-700 truncate flex-1">
+                                        {item.name}
+                                    </h2>
+                                    <span
+                                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                                            item.stock - currentQtyInCart < 5
+                                                ? "bg-orange-50 text-orange-600"
+                                                : "bg-green-50 text-green-600"
+                                        } ${
+                                            item.stock - currentQtyInCart === 0
+                                                ? "bg-red-50 text-red-600"
+                                                : ""
+                                        }`}
+                                    >
+                                        {/* Logika Real-time: Stok asli dikurang yang sudah masuk keranjang */}
+                                        Sisa: {item.stock - currentQtyInCart}
                                     </span>
                                 </div>
-                            )}
-                        </div>
+                                <p className="text-lg font-bold text-indigo-600 mb-4">
+                                    Rp {item.price.toLocaleString("id-ID")}
+                                </p>
 
-                        <div className="p-5">
-                            <div className="flex justify-between items-start mb-2">
-                                <h2 className="text-sm font-semibold text-gray-700 truncate flex-1">
-                                    {item.name}
-                                </h2>
-                                <span
-                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                                        item.stock < 5
-                                            ? "bg-orange-50 text-orange-600"
-                                            : "bg-green-50 text-green-600"
-                                    } ${
-                                        item.stock === 0
-                                            ? "bg-red-50 text-red-600"
-                                            : ""
-                                    }`}
-                                >
-                                    Sisa: {item.stock}
-                                </span>
+                                <div >
+                                    <button
+                                        onClick={() => addToCart(item)}
+                                        disabled={isOutOfStock} // Pakai variabel cek tadi
+                                        className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                                            !isOutOfStock
+                                                ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100 shadow-lg"
+                                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        }`}
+                                    >
+                                        <ShoppingCart size={16} />
+                                        {isOutOfStock ? "Habis" : "+ Keranjang"}
+                                    </button>
+                                    
+                                    <button className="">
+                                      -
+                                    </button>
+                                </div>
                             </div>
-                            <p className="text-lg font-bold text-indigo-600 mb-4">
-                                Rp {item.price.toLocaleString("id-ID")}
-                            </p>
-
-                            <button
-                                onClick={() => openModal(item)}
-                                disabled={item.stock <= 0}
-                                className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                                    item.stock > 0
-                                        ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100 shadow-lg"
-                                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                }`}
-                            >
-                                <ShoppingCart size={16} />
-                                Beli
-                            </button>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
+
+            {cart.length > 0 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-[70] animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div>
+                        <p className="text-xs opacity-80">
+                            {cart.reduce((a, b) => a + b.qty, 0)} Produk dipilih
+                        </p>
+                        <p className="font-bold text-lg">
+                            Total: Rp{" "}
+                            {totalHargaKeranjang.toLocaleString("id-ID")}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setShowModal(true)} // Munculkan modal bayar untuk SEMUA isi keranjang
+                            className="bg-white text-indigo-600 px-6 py-2 rounded-xl font-bold text-sm hover:bg-indigo-50"
+                        >
+                            Bayar Sekarang
+                        </button>
+                        <button
+                            onClick={() => setCart([])}
+                            className="bg-red-500/20 hover:bg-red-500 text-white p-2 rounded-xl transition-all border border-red-400/30"
+                            title="Batalkan semua"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Konfirmasi */}
             <div
@@ -149,42 +221,59 @@ export default function ProductCard({ transactions, setTransactions }) {
                     showModal
                         ? "opacity-100 visible"
                         : "opacity-0 invisible pointer-events-none"
-                } inset-0 z-50
-                    flex items-center
-                justify-center p-4 backdrop-blur-md bg-indigo-900/20 animate-in
-                fade-in duration-300`}
+                } inset-0 z-[80] flex items-center justify-center p-4 backdrop-blur-md bg-indigo-900/20 animate-in fade-in duration-300`}
             >
                 <div
                     className={`bg-white ${
                         showModal
                             ? "scale-100 opacity-100"
                             : "scale-75 opacity-0"
-                    } rounded-3xl
-                        shadow-2xl max-w-sm
-                    w-full p-8 text-center transition-all duration-300 ease-[box-bezier(0.23,1,0.32,1)`}
+                    } rounded-3xl shadow-2xl max-w-sm w-full p-8 transition-all duration-300`}
                 >
                     <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <ShoppingCart size={32} />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800">
-                        Konfirmasi
+                    <h3 className="text-xl font-bold text-gray-800 text-center">
+                        Detail Pesanan
                     </h3>
-                    <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-                        Beli{" "}
-                        <span className="text-gray-800 font-semibold">
-                            {selectedProduct?.name}
+
+                    {/* List Belanjaan */}
+                    <div className="mt-4 max-h-40 overflow-y-auto space-y-2 py-2">
+                        {cart.map(item => (
+                            <div
+                                key={item.id}
+                                className="flex justify-between text-sm text-gray-600 border-b border-gray-50 pb-2"
+                            >
+                                <span>
+                                    {item.name}{" "}
+                                    <span className="text-indigo-600 font-bold">
+                                        x{item.qty}
+                                    </span>
+                                </span>
+                                <span className="font-semibold text-gray-800">
+                                    Rp{" "}
+                                    {(item.price * item.qty).toLocaleString(
+                                        "id-ID"
+                                    )}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Total yang harus dibayar */}
+                    <div className="mt-4 p-4 bg-indigo-50 rounded-2xl flex justify-between items-center">
+                        <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider">
+                            Total Bayar
                         </span>
-                        ?<br />
-                        Uang{" "}
-                        <span className="text-indigo-600 font-bold">
-                            Rp {selectedProduct?.price.toLocaleString("id-ID")}
-                        </span>{" "}
-                        akan masuk ke laci.
-                    </p>
+                        <span className="text-lg font-black text-indigo-600">
+                            Rp {totalHargaKeranjang.toLocaleString("id-ID")}
+                        </span>
+                    </div>
+
                     <div className="mt-8 flex gap-3">
                         <button
                             onClick={() => setShowModal(false)}
-                            className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-2xl transition-all"
+                            className="flex-1 py-3 text-sm font-bold text-gray-400 hover:bg-gray-50 rounded-2xl transition-all"
                         >
                             Batal
                         </button>

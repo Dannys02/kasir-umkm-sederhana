@@ -16,10 +16,17 @@ export default function Transaction({ transactions, setTransactions }) {
                         {transactions.map(tx => (
                             <li
                                 key={tx.id}
-                                className="flex justify-between text-sm"
+                                className="flex justify-between items-center p-3 bg-indigo-50/50 rounded-xl"
                             >
-                                <span>{tx.product}</span>
-                                <span className="font-medium">
+                                <div>
+                                    <p className="font-bold text-gray-800">
+                                        {tx.product}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400">
+                                        Jam: {tx.time}
+                                    </p>
+                                </div>
+                                <span className="font-bold text-indigo-600">
                                     Rp {tx.price.toLocaleString("id-ID")}
                                 </span>
                             </li>
