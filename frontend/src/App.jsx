@@ -6,17 +6,23 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProductCard from "./components/ProductCard";
 import ProductList from "./components/ProductList";
+import CategoryList from "./components/CategoryList";
 import Transaction from "./components/Transaction";
 
 function App() {
     const [transactions, setTransactions] = useState([]);
     const [cart, setCart] = useState([]);
     const [revenue, setRevenue] = useState(0);
+    const [categories, setCategories] = useState([
+        { id: 1, name: "Makanan" },
+        { id: 2, name: "Minuman" }
+    ]);
     const [products, setProducts] = useState([
         {
             id: 1,
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWnD5zRlT-ofpy1KNUFNLrcHA7_ZnGU7zRqYbMFusCi2st6yEmz--OR-5g&s=10",
             name: "Ayam Dada",
+            category: "Makanan",
             price: 8000,
             stock: 5
         },
@@ -24,6 +30,7 @@ function App() {
             id: 2,
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0ABnY1vV4nPAdvmnYJjjkjMGmbk5v3WrjZcWLIH0TokL1w4q2q6VDoQiM&s=10",
             name: "Ayam Paha",
+            category: "Makanan",
             price: 8000,
             stock: 5
         },
@@ -31,6 +38,7 @@ function App() {
             id: 3,
             image: "https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/06/15093247/Ketahui-Fakta-Es-Teh-Manis.jpg",
             name: "Es Teh Manis",
+            category: "Minuman",
             price: 3000,
             stock: 5
         },
@@ -38,6 +46,7 @@ function App() {
             id: 4,
             image: "https://nilaigizi.com/assets/images/produk/produk_1535761724.png",
             name: "Nasi Putih",
+            category: "Makanan",
             price: 2000,
             stock: 5
         }
@@ -92,6 +101,7 @@ function App() {
                             <ProductCard
                                 products={products}
                                 setProducts={setProducts}
+                                categories={categories}
                                 transactions={transactions}
                                 setTransactions={setTransactions}
                                 cart={cart}
@@ -109,6 +119,18 @@ function App() {
                             <ProductList
                                 products={products}
                                 setProducts={setProducts}
+                                categories={categories}
+                                setCategories={setCategories}
+                            />
+                        }
+                    />
+                    <Route
+                        path="/daftar-kategori"
+                        element={
+                            <CategoryList
+                                products={products}
+                                categories={categories}
+                                setCategories={setCategories}
                             />
                         }
                     />

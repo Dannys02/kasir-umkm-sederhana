@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { Plus, Edit2, Trash2, Image as ImageIcon } from "lucide-react";
 
-export default function ProductList({ products, setProducts }) {
+export default function ProductList({
+    products,
+    setProducts,
+    categories,
+    setCategories
+}) {
     const [form, setForm] = useState({
         id: null,
         name: "",
+        category: "",
         price: "",
         stock: "",
         image: ""
@@ -13,7 +19,15 @@ export default function ProductList({ products, setProducts }) {
 
     // Handle Input
     const handleChange = e => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        if (name === "price" || name === "stock") {
+            // Hapus semua karakter yang BUKAN angka (titik, koma, huruf, dll)
+            const cleanValue = value.replace(/\D/g, "");
+            setForm({ ...form, [name]: cleanValue });
+        } else {
+            setForm({ ...form, [name]: value });
+        }
     };
 
     // Simpan atau Update
@@ -74,15 +88,34 @@ export default function ProductList({ products, setProducts }) {
                         className="p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
                         required
                     />
+                    <select
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange}
+                        className="p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+                        required
+                    >
+                        <option value="">-- Pilih Kategori --</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.name}>
+                                {cat.name}
+                            </option>
+                        ))}
+                    </select>
                     <input
                         type="number"
                         name="price"
-                        placeholder="Harga (Rp)..."
-                        value={form.price.toLocaleString("id-ID")}
+                        placeholder="Harga (Rp)"
+                        value={
+                            form.price
+                                ? Number(form.price).toLocaleString("id-ID")
+                                : ""
+                        }
                         onChange={handleChange}
                         className="p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
                         required
                     />
+
                     <input
                         type="number"
                         name="stock"

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, History, Menu, X } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, History, Tags, Menu, X } from "lucide-react";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +12,11 @@ export default function Navbar() {
             name: "Daftar Produk",
             to: "/daftar-produk",
             icon: <ShoppingBag size={18} />
+        },
+        {
+            name: "Daftar Kategori",
+            to: "/daftar-kategori",
+            icon: <Tags size={18} />
         },
         {
             name: "Riwayat Transaksi",
