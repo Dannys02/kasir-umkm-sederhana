@@ -2,47 +2,20 @@ import React, { useState } from "react";
 import { Check, ShoppingCart, X } from "lucide-react";
 
 export default function ProductCard({
+    products,
+    setProducts,
     transactions,
     setTransactions,
     cart,
     setCart,
-    addToCart
+    addToCart,
+    removeFromCart,
+    revenue,
+    setRevenue
 }) {
     const [showModal, setShowModal] = useState(false);
     const [succesModal, setSuccesModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [revenue, setRevenue] = useState(0);
-
-    const [dummyProducts, setDummyProducts] = useState([
-        {
-            id: 1,
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWnD5zRlT-ofpy1KNUFNLrcHA7_ZnGU7zRqYbMFusCi2st6yEmz--OR-5g&s=10",
-            name: "Ayam Dada",
-            price: 8000,
-            stock: 5
-        },
-        {
-            id: 2,
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0ABnY1vV4nPAdvmnYJjjkjMGmbk5v3WrjZcWLIH0TokL1w4q2q6VDoQiM&s=10",
-            name: "Ayam Paha",
-            price: 7000,
-            stock: 5
-        },
-        {
-            id: 3,
-            image: "https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/06/15093247/Ketahui-Fakta-Es-Teh-Manis.jpg",
-            name: "Es Teh Manis",
-            price: 3000,
-            stock: 5
-        },
-        {
-            id: 4,
-            image: "https://nilaigizi.com/assets/images/produk/produk_1535761724.png",
-            name: "Nasi Putih",
-            price: 4000,
-            stock: 3
-        }
-    ]);
 
     const openModal = product => {
         setSelectedProduct(product);
@@ -64,7 +37,7 @@ export default function ProductCard({
         setTransactions(prev => [...newTransactions, ...prev]);
 
         // 3. Kurangi stok produk
-        setDummyProducts(prevProducts =>
+        setProducts(prevProducts =>
             prevProducts.map(p => {
                 const itemInCart = cart.find(c => c.id === p.id);
                 return itemInCart
@@ -97,11 +70,11 @@ export default function ProductCard({
                         Kelola penjualan dengan mudah
                     </p>
                 </div>
-                <div className="bg-indigo-50 px-6 py-3 rounded-xl border border-indigo-100">
-                    <p className="text-[10px] text-indigo-400 uppercase tracking-[0.2em] font-bold">
+                <div className="bg-orange-50 px-6 py-3 rounded-xl border border-indigo-100">
+                    <p className="text-[10px] text-orange-400 uppercase tracking-[0.2em] font-bold">
                         Total Pemasukan
                     </p>
-                    <p className="text-2xl font-black text-indigo-600">
+                    <p className="text-2xl font-black text-orange-600">
                         Rp {revenue.toLocaleString("id-ID")}
                     </p>
                 </div>
@@ -112,7 +85,7 @@ export default function ProductCard({
                 className={`grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl
             mx-auto ${cart.length > 0 ? "pb-[88px]" : ""}`}
             >
-                {dummyProducts.map(item => {
+                {products.map(item => {
                     const itemInCart = cart.find(c => c.id === item.id);
                     const currentQtyInCart = itemInCart ? itemInCart.qty : 0;
                     const isOutOfStock = item.stock - currentQtyInCart <= 0;
@@ -158,27 +131,32 @@ export default function ProductCard({
                                         Sisa: {item.stock - currentQtyInCart}
                                     </span>
                                 </div>
-                                <p className="text-lg font-bold text-indigo-600 mb-4">
+                                <p className="text-lg font-bold text-orange-600 mb-4">
                                     Rp {item.price.toLocaleString("id-ID")}
                                 </p>
 
-                                <div >
+                                <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => addToCart(item)}
                                         disabled={isOutOfStock} // Pakai variabel cek tadi
                                         className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                                             !isOutOfStock
-                                                ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100 shadow-lg"
+                                                ? "bg-orange-600 text-white hover:bg-orange-700 shadow-indigo-100 shadow-lg"
                                                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
                                         }`}
                                     >
                                         <ShoppingCart size={16} />
-                                        {isOutOfStock ? "Habis" : "+ Keranjang"}
+                                        {isOutOfStock ? "Habis" : "Keranjang"}
                                     </button>
                                     
-                                    <button className="">
-                                      -
+                                    {currentQtyInCart > 0 && (
+                                    <button
+                                        onClick={() => removeFromCart(item)}
+                                        className={`flex items-center justify-center w-10 h-10 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition-all active:scale-95 font-bold ${item.stock === 0 ? "hidden" : ""}`}
+                                    >
+                                        —
                                     </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -187,7 +165,7 @@ export default function ProductCard({
             </div>
 
             {cart.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-[70] animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-orange-600 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-[70] animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div>
                         <p className="text-xs opacity-80">
                             {cart.reduce((a, b) => a + b.qty, 0)} Produk dipilih
@@ -200,7 +178,7 @@ export default function ProductCard({
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setShowModal(true)} // Munculkan modal bayar untuk SEMUA isi keranjang
-                            className="bg-white text-indigo-600 px-6 py-2 rounded-xl font-bold text-sm hover:bg-indigo-50"
+                            className="bg-white text-orange-600 px-6 py-2 rounded-xl font-bold text-sm hover:bg-orange-50"
                         >
                             Bayar Sekarang
                         </button>
@@ -221,7 +199,7 @@ export default function ProductCard({
                     showModal
                         ? "opacity-100 visible"
                         : "opacity-0 invisible pointer-events-none"
-                } inset-0 z-[80] flex items-center justify-center p-4 backdrop-blur-md bg-indigo-900/20 animate-in fade-in duration-300`}
+                } inset-0 z-[80] flex items-center justify-center p-4 backdrop-blur-md bg-orange-900/20 animate-in fade-in duration-300`}
             >
                 <div
                     className={`bg-white ${
@@ -230,7 +208,7 @@ export default function ProductCard({
                             : "scale-75 opacity-0"
                     } rounded-3xl shadow-2xl max-w-sm w-full p-8 transition-all duration-300`}
                 >
-                    <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                         <ShoppingCart size={32} />
                     </div>
                     <h3 className="text-xl font-bold text-gray-800 text-center">
@@ -246,7 +224,7 @@ export default function ProductCard({
                             >
                                 <span>
                                     {item.name}{" "}
-                                    <span className="text-indigo-600 font-bold">
+                                    <span className="text-orange-600 font-bold">
                                         x{item.qty}
                                     </span>
                                 </span>
@@ -261,11 +239,11 @@ export default function ProductCard({
                     </div>
 
                     {/* Total yang harus dibayar */}
-                    <div className="mt-4 p-4 bg-indigo-50 rounded-2xl flex justify-between items-center">
-                        <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider">
+                    <div className="mt-4 p-4 bg-orange-50 rounded-2xl flex justify-between items-center">
+                        <span className="text-xs text-orange-400 font-bold uppercase tracking-wider">
                             Total Bayar
                         </span>
-                        <span className="text-lg font-black text-indigo-600">
+                        <span className="text-lg font-black text-orange-600">
                             Rp {totalHargaKeranjang.toLocaleString("id-ID")}
                         </span>
                     </div>
@@ -279,7 +257,7 @@ export default function ProductCard({
                         </button>
                         <button
                             onClick={handleConfirm}
-                            className="flex-1 py-3 text-sm font-bold bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
+                            className="flex-1 py-3 text-sm font-bold bg-orange-600 text-white rounded-2xl shadow-lg shadow-indigo-200 hover:bg-orange-700 transition-all"
                         >
                             Ya, Proses
                         </button>

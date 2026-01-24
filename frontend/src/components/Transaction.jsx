@@ -16,7 +16,7 @@ export default function Transaction({ transactions, setTransactions }) {
                         {transactions.map(tx => (
                             <li
                                 key={tx.id}
-                                className="flex justify-between items-center p-3 bg-indigo-50/50 rounded-xl"
+                                className="flex justify-between items-center p-3 bg-orange-50/50 rounded-xl"
                             >
                                 <div>
                                     <p className="font-bold text-gray-800">
@@ -26,7 +26,7 @@ export default function Transaction({ transactions, setTransactions }) {
                                         Jam: {tx.time}
                                     </p>
                                 </div>
-                                <span className="font-bold text-indigo-600">
+                                <span className="font-bold text-orange-600">
                                     Rp {tx.price.toLocaleString("id-ID")}
                                 </span>
                             </li>
