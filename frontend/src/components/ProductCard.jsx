@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Check, ShoppingCart, X } from "lucide-react";
 
-export default function ProductCard() {
+export default function ProductCard({ transactions, setTransactions }) {
     const [showModal, setShowModal] = useState(false);
     const [succesModal, setSuccesModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -13,34 +13,30 @@ export default function ProductCard() {
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWnD5zRlT-ofpy1KNUFNLrcHA7_ZnGU7zRqYbMFusCi2st6yEmz--OR-5g&s=10",
             name: "Ayam Dada",
             price: 8000,
-            stock: 20
+            stock: 5
         },
         {
             id: 2,
             image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0ABnY1vV4nPAdvmnYJjjkjMGmbk5v3WrjZcWLIH0TokL1w4q2q6VDoQiM&s=10",
             name: "Ayam Paha",
             price: 7000,
-            stock: 15
+            stock: 5
         },
         {
             id: 3,
             image: "https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/06/15093247/Ketahui-Fakta-Es-Teh-Manis.jpg",
             name: "Es Teh Manis",
             price: 3000,
-            stock: 50
+            stock: 5
         },
         {
             id: 4,
             image: "https://nilaigizi.com/assets/images/produk/produk_1535761724.png",
             name: "Nasi Putih",
             price: 4000,
-            stock: 30
+            stock: 3
         }
     ]);
-    
-    /*const [transactions, setTransactions] = useState([
-      
-      ]);*/
 
     const openModal = product => {
         setSelectedProduct(product);
@@ -63,7 +59,7 @@ export default function ProductCard() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6 font-sans">
+        <>
             <div className="max-w-7xl mx-auto mb-8 flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-indigo-50">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
@@ -88,7 +84,9 @@ export default function ProductCard() {
                 {dummyProducts.map(item => (
                     <div
                         key={item.id}
-                        className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        className="group bg-white rounded-2xl overflow-hidden
+                        shadow-sm border border-indigo-500 hover:shadow-xl
+                        hover:-translate-y-1 transition-all duration-300"
                     >
                         <div className="relative aspect-square overflow-hidden bg-gray-50">
                             <img
@@ -113,8 +111,12 @@ export default function ProductCard() {
                                 <span
                                     className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                                         item.stock < 5
-                                            ? "bg-orange-50 text-orange-500"
-                                            : "bg-gray-50 text-gray-400"
+                                            ? "bg-orange-50 text-orange-600"
+                                            : "bg-green-50 text-green-600"
+                                    } ${
+                                        item.stock === 0
+                                            ? "bg-red-50 text-red-600"
+                                            : ""
                                     }`}
                                 >
                                     Sisa: {item.stock}
@@ -198,7 +200,7 @@ export default function ProductCard() {
 
             {/* Modal Success */}
             <div
-                className={`fixed left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 ease-[box-bezier(0.23,1,0.32,1)]
+                className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-[box-bezier(0.23,1,0.32,1)]
     ${
         succesModal
             ? "top-10 opacity-100 scale-100"
@@ -214,6 +216,6 @@ export default function ProductCard() {
                     </span>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

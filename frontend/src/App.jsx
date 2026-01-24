@@ -9,17 +9,38 @@ import ProductList from "./components/ProductList";
 import Transaction from "./components/Transaction";
 
 function App() {
+    const [transactions, setTransactions] = useState([]);
+
     const [count, setCount] = useState(0);
 
     return (
-        <div>
+        <>
             <Navbar />
-            <Routes>
-                <Route path="/" element={<ProductCard />} />
-                <Route path="/daftar-produk" element={<ProductList />} />
-                <Route path="/riwayat-transaksi" element={<Transaction />} />
-            </Routes>
-        </div>
+
+            <div className="min-h-screen bg-gray-50 p-6 font-sans">
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <ProductCard
+                                transactions={transactions}
+                                setTransactions={setTransactions}
+                            />
+                        }
+                    />
+                    <Route path="/daftar-produk" element={<ProductList />} />
+                    <Route
+                        path="/riwayat-transaksi"
+                        element={
+                            <Transaction
+                                transactions={transactions}
+                                setTransactions={setTransactions}
+                            />
+                        }
+                    />
+                </Routes>
+            </div>
+        </>
     );
 }
 
