@@ -1,6 +1,5 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -9,48 +8,39 @@ import ProductList from "./components/ProductList";
 import CategoryList from "./components/CategoryList";
 import Transaction from "./components/Transaction";
 
+const API_URL = "http://127.0.0.1:8000/api";
+
 function App() {
     const [transactions, setTransactions] = useState([]);
     const [cart, setCart] = useState([]);
     const [revenue, setRevenue] = useState(0);
-    const [categories, setCategories] = useState([
-        { id: 1, name: "Makanan" },
-        { id: 2, name: "Minuman" }
-    ]);
-    const [products, setProducts] = useState([
-        {
-            id: 1,
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWnD5zRlT-ofpy1KNUFNLrcHA7_ZnGU7zRqYbMFusCi2st6yEmz--OR-5g&s=10",
-            name: "Ayam Dada",
-            category: "Makanan",
-            price: 8000,
-            stock: 5
-        },
-        {
-            id: 2,
-            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0ABnY1vV4nPAdvmnYJjjkjMGmbk5v3WrjZcWLIH0TokL1w4q2q6VDoQiM&s=10",
-            name: "Ayam Paha",
-            category: "Makanan",
-            price: 8000,
-            stock: 5
-        },
-        {
-            id: 3,
-            image: "https://d1vbn70lmn1nqe.cloudfront.net/prod/wp-content/uploads/2021/06/15093247/Ketahui-Fakta-Es-Teh-Manis.jpg",
-            name: "Es Teh Manis",
-            category: "Minuman",
-            price: 3000,
-            stock: 5
-        },
-        {
-            id: 4,
-            image: "https://nilaigizi.com/assets/images/produk/produk_1535761724.png",
-            name: "Nasi Putih",
-            category: "Makanan",
-            price: 2000,
-            stock: 5
+    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fungsi Ambil Data dari Laravel
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const resProd = await axios.get(`${API_URL}/products`);
+            setProducts(resProd.data.data || []);
+
+            const resCat = await axios.get(`${API_URL}/categories`);
+            setCategories(resCat.data.data || []);
+
+            const resTrx = await axios.get(`${API_URL}/transactions`);
+            setTransactions(resTrx.data.data || []);
+            setRevenue(resTrx.data.total_revenue || 0);
+        } catch (error) {
+            console.error("Gagal ambil data!", error);
+        } finally {
+            setLoading(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const addToCart = product => {
         setCart(prev => {
@@ -76,13 +66,9 @@ function App() {
     const removeFromCart = product => {
         setCart(prev => {
             const isExist = prev.find(item => item.id === product.id);
-
-            // Kalau barangnya cuma ada 1 di keranjang, hapus total dari array
-            if (isExist.qty === 1) {
+            if (!isExist) return prev;
+            if (isExist.qty === 1)
                 return prev.filter(item => item.id !== product.id);
-            }
-
-            // Kalau lebih dari 1, kurangi qty-nya saja
             return prev.map(item =>
                 item.id === product.id ? { ...item, qty: item.qty - 1 } : item
             );
@@ -92,15 +78,15 @@ function App() {
     return (
         <>
             <Navbar />
-
             <div className="bg-gray-50 p-6 font-sans">
                 <Routes>
                     <Route
                         path="/"
                         element={
                             <ProductCard
+                                loading={loading}
+                                setLoading={setLoading}
                                 products={products}
-                                setProducts={setProducts}
                                 categories={categories}
                                 transactions={transactions}
                                 setTransactions={setTransactions}
@@ -110,6 +96,7 @@ function App() {
                                 removeFromCart={removeFromCart}
                                 revenue={revenue}
                                 setRevenue={setRevenue}
+                                fetchData={fetchData} // <--- Kirim ini buat refresh data
                             />
                         }
                     />
@@ -117,10 +104,12 @@ function App() {
                         path="/daftar-produk"
                         element={
                             <ProductList
+                                loading={loading}
+                                setLoading={setLoading}
                                 products={products}
                                 setProducts={setProducts}
                                 categories={categories}
-                                setCategories={setCategories}
+                                fetchData={fetchData}
                             />
                         }
                     />
@@ -128,9 +117,11 @@ function App() {
                         path="/daftar-kategori"
                         element={
                             <CategoryList
-                                products={products}
+                                loading={loading}
+                                setLoading={setLoading}
                                 categories={categories}
-                                setCategories={setCategories}
+                                products={products}
+                                fetchData={fetchData}
                             />
                         }
                     />
@@ -138,8 +129,9 @@ function App() {
                         path="/riwayat-transaksi"
                         element={
                             <Transaction
+                                loading={loading}
+                                setLoading={setLoading}
                                 transactions={transactions}
-                                setTransactions={setTransactions}
                             />
                         }
                     />
