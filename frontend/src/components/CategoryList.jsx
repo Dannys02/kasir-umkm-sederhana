@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Trash2, Edit2, X, Check } from "lucide-react";
+import { Plus, Trash2, Tags, Edit2, X, Check } from "lucide-react";
 import axios from "axios";
 
 export default function CategoryList({
@@ -82,62 +82,78 @@ export default function CategoryList({
                 </button>
             </form>
             <div className="space-y-3">
-                {categories.map(cat => (
-                    <div
-                        key={cat.id}
-                        className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl group hover:bg-orange-50 transition-all"
-                    >
-                        {editingId === cat.id ? (
-                            <input
-                                type="text"
-                                className="flex-1 p-1 bg-white border rounded outline-none"
-                                value={editName}
-                                onChange={e => setEditName(e.target.value)}
-                                autoFocus
-                            />
-                        ) : (
-                            <span className="font-semibold text-gray-700">
-                                {cat.name}
-                            </span>
-                        )}
-                        <div className="flex gap-2 opacity-100 transition-all">
-                            {editingId === cat.id ? (
-                                <>
-                                    <button
-                                        onClick={saveEdit}
-                                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
-                                    >
-                                        <Check size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => setEditingId(null)}
-                                        className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={() => {
-                                            setEditingId(cat.id);
-                                            setEditName(cat.name);
-                                        }}
-                                        className="p-2 text-orange-500 hover:bg-orange-100 rounded-lg"
-                                    >
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => deleteCategory(cat.id)}
-                                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </>
-                            )}
+                {categories.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+                        <div className="bg-gray-50 p-6 rounded-full mb-4">
+                            <Tags size={48} className="text-gray-300" />
                         </div>
+                        <h3 className="text-lg font-bold text-gray-700">
+                            Data Kategori Tidak Ada
+                        </h3>
+                        <p className="text-gray-400 text-sm">
+                            Belum ada kategori yang ditambahkan di sini.
+                        </p>
                     </div>
-                ))}
+                ) : (
+                    categories.map(cat => (
+                        <div
+                            key={cat.id}
+                            className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl group hover:bg-orange-50 transition-all"
+                        >
+                            {editingId === cat.id ? (
+                                <input
+                                    type="text"
+                                    className="flex-1 p-1 bg-white border rounded outline-none"
+                                    value={editName}
+                                    onChange={e => setEditName(e.target.value)}
+                                    autoFocus
+                                />
+                            ) : (
+                                <span className="font-semibold text-gray-700">
+                                    {cat.name}
+                                </span>
+                            )}
+                            <div className="flex gap-2 opacity-100 transition-all">
+                                {editingId === cat.id ? (
+                                    <>
+                                        <button
+                                            onClick={saveEdit}
+                                            className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
+                                        >
+                                            <Check size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingId(null)}
+                                            className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => {
+                                                setEditingId(cat.id);
+                                                setEditName(cat.name);
+                                            }}
+                                            className="p-2 text-orange-500 hover:bg-orange-100 rounded-lg"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                deleteCategory(cat.id)
+                                            }
+                                            className="p-2 text-red-500 hover:bg-red-100 rounded-lg"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

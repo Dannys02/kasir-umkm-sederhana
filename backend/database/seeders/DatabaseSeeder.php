@@ -19,8 +19,6 @@ class DatabaseSeeder extends Seeder
   {
     // User::factory(10)->create();
 
-
-
     // 1. Buat Kategori
     $makanan = Category::create(["name" => "Makanan"]);
     $minuman = Category::create(["name" => "Minuman"]);
@@ -33,7 +31,7 @@ class DatabaseSeeder extends Seeder
       "stock" => 10,
       "image" => "products/NasiGeprek.jpg", // Nanti bisa upload via dashboard
     ]);
-    
+
     Product::create([
       "category_id" => $minuman->id,
       "name" => "Teh Manis",

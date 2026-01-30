@@ -16,6 +16,10 @@ export default function ProductList({
         stock: ""
     });
 
+    const [successModal, setSuccessModal] = useState(false);
+    const [errorModal, setErrorModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null); // Untuk nampilin gambar yang dipilih
     const [isEdit, setIsEdit] = useState(false);
@@ -40,35 +44,46 @@ export default function ProductList({
         data.append("price", form.price);
         data.append("stock", form.stock);
 
-        // Hanya kirim gambar kalau ada perubahan
         if (imageFile) {
             data.append("image", imageFile);
         }
 
         try {
             if (isEdit) {
-                // TRIK LARAVEL: Pakai POST tapi tambahin spoofing method PUT
                 data.append("_method", "PUT");
-                await axios.put(
+                // Menggunakan POST karena membawa FormData (Laravel Spoofing)
+                await axios.post(
                     `http://127.0.0.1:8000/api/products/${form.id}`,
                     data,
                     {
                         headers: { "Content-Type": "multipart/form-data" }
                     }
                 );
+                setModalMessage("Produk Berhasil Diperbarui!");
             } else {
                 await axios.post("http://127.0.0.1:8000/api/products", data, {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
+                setModalMessage("Produk Berhasil Ditambahkan!");
             }
 
+            setSuccessModal(true);
             fetchData();
             resetForm();
-            alert("Produk berhasil disimpan!");
+
+            // Auto close modal setelah 3 detik
+            setTimeout(() => setSuccessModal(false), 3000);
         } catch (error) {
-            console.error(error);
-            alert("Gagal simpan produk! Cek koneksi atau validasi Laravel.");
-        }
+    // Lihat di Inspect > Console > Network Tab
+    console.error("Penyakitnya adalah:", error.response?.data); 
+    
+    // Ambil pesan error dari Laravel kalau ada
+    const errorMessage = error.response?.data?.message || "Gagal Memproses Data!";
+    setModalMessage(errorMessage);
+    setErrorModal(true);
+    setTimeout(() => setErrorModal(false), 3000);
+}
+
     };
 
     const resetForm = () => {
@@ -96,23 +111,17 @@ export default function ProductList({
         if (confirm("Hapus produk ini?")) {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/products/${id}`);
+                setModalMessage("Produk Berhasil Dihapus!");
+                setSuccessModal(true);
                 fetchData();
+                setTimeout(() => setSuccessModal(false), 3000);
             } catch (error) {
-                alert("Gagal hapus!");
+                setModalMessage("Gagal Menghapus Produk!");
+                setErrorModal(true);
+                setTimeout(() => setErrorModal(false), 3000);
             }
         }
     };
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <div className="custom-loader mb-4"></div>
-                <p className="text-gray-400 animate-pulse">
-                    Menghubungkan ke server...
-                </p>
-            </div>
-        );
-    }
 
     return (
         <div className="max-w-7xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-orange-50">
@@ -123,7 +132,7 @@ export default function ProductList({
 
             <form
                 onSubmit={handleSubmit}
-                className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-10 bg-gray-50 p-6 rounded-2xl"
+                className="grid grid-cols-1 gap-4 mb-10 bg-gray-50 p-6 rounded-2xl"
             >
                 <input
                     type="text"
@@ -169,7 +178,7 @@ export default function ProductList({
                 />
 
                 {/* Input Gambar dengan Preview */}
-                <label className="relative flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white transition-all p-2 overflow-hidden h-[300px] md:h-auto">
+                <label className="relative flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-white transition-all p-2 overflow-hidden h-[300px]">
                     {previewUrl ? (
                         <img
                             src={previewUrl}
@@ -191,6 +200,14 @@ export default function ProductList({
                         onChange={handleImageChange}
                     />
                 </label>
+
+                <div className="w-full mt-1">
+                    <p className="text-gray-500 italic text-center leading-tight">
+                        * Gunakan gambar maksimal{" "}
+                        <span className="text-red-600 font-bold">1 MB</span>{" "}
+                        untuk performa terbaik.
+                    </p>
+                </div>
 
                 <div className="flex gap-2">
                     <button
@@ -230,56 +247,114 @@ export default function ProductList({
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map(p => (
-                            <tr
-                                key={p.id}
-                                className="border-b border-gray-50 hover:bg-gray-50/50 transition-all"
-                            >
-                                <td className="py-4 px-6 gap-3">
-                                    <img
-                                        src={
-                                            p.image
-                                                ? p.image.startsWith("http")
-                                                    ? p.image
-                                                    : STORAGE_URL + p.image
-                                                : "https://via.placeholder.com/50"
-                                        }
-                                        className="w-10 h-10 rounded-lg object-cover border border-gray-100"
-                                        alt={p.name}
-                                    />
-                                </td>
-                                <td className="py-4 px-6 font-semibold text-gray-700 gap-3">
-                                    {p.name}
-                                </td>
-                                <td className="py-4 px-6 text-sm text-gray-500">
-                                    {p.category?.name || "No Category"}
-                                </td>
-                                <td className="py-4 px-6 text-orange-600 font-bold">
-                                    Rp {p.price.toLocaleString("id-ID")}
-                                </td>
-                                <td className="py-4 px-6 text-gray-500">
-                                    {p.stock} pcs
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                    <div className="flex justify-center gap-2">
-                                        <button
-                                            onClick={() => editProduct(p)}
-                                            className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg"
-                                        >
-                                            <Edit2 size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => deleteProduct(p.id)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                        {loading ? (
+                            <tr>
+                                <td colSpan="6" className="py-20">
+                                    <div className="flex flex-col items-center justify-center w-full">
+                                        <div className="custom-loader"></div>
+                                        <p className="text-gray-400">
+                                            Memuat data...
+                                        </p>
                                     </div>
                                 </td>
                             </tr>
+                        ) : (
+                            products.length === 0 ? (
+                            <td colSpan="6" className="text-gray-400 text-center py-6"> Tidak ada data produk.</td>
+                            ) : (
+                            products.map(p => (
+                                <tr
+                                    key={p.id}
+                                    className="border-b border-gray-50 hover:bg-gray-50/50 transition-all"
+                                >
+                                    <td className="py-4 px-6 gap-3">
+                                        <img
+                                            src={
+                                                p.image
+                                                    ? p.image.startsWith("http")
+                                                        ? p.image
+                                                        : STORAGE_URL + p.image
+                                                    : "https://via.placeholder.com/50"
+                                            }
+                                            className="w-10 h-10 rounded-lg object-cover border border-gray-100"
+                                            alt={p.name}
+                                        />
+                                    </td>
+                                    <td className="py-4 px-6 font-semibold text-gray-700 gap-3">
+                                        {p.name}
+                                    </td>
+                                    <td className="py-4 px-6 text-sm text-gray-500">
+                                        {p.category?.name || "No Category"}
+                                    </td>
+                                    <td className="py-4 px-6 text-orange-600 font-bold">
+                                        Rp {p.price.toLocaleString("id-ID")}
+                                    </td>
+                                    <td className="py-4 px-6 text-gray-500">
+                                        {p.stock}
+                                    </td>
+                                    <td className="py-4 px-6 text-center">
+                                        <div className="flex justify-center gap-2">
+                                            <button
+                                                onClick={() => editProduct(p)}
+                                                className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg"
+                                            >
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    deleteProduct(p.id)
+                                                }
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Modal Berhasil */}
+            <div
+                className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ${
+                    successModal
+                        ? "top-10 opacity-100 scale-100"
+                        : "-top-20 opacity-0 scale-95 pointer-events-none"
+                }`}
+            >
+                <div className="bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400">
+                    <div className="bg-white/20 p-1 rounded-full animate-bounce">
+                        <Plus
+                            size={20}
+                            strokeWidth={3}
+                            className="rotate-45 rotate-0 transition-transform duration-500"
+                        />
+                    </div>
+                    <span className="font-bold tracking-wide">
+                        {modalMessage}
+                    </span>
+                </div>
+            </div>
+
+            {/* Modal Gagal */}
+            <div
+                className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ${
+                    errorModal
+                        ? "top-10 opacity-100 scale-100"
+                        : "-top-20 opacity-0 scale-95 pointer-events-none"
+                }`}
+            >
+                <div className="bg-rose-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400">
+                    <div className="bg-white/20 p-1 rounded-full">
+                        <X size={20} strokeWidth={3} />
+                    </div>
+                    <span className="font-bold tracking-wide">
+                        {modalMessage}
+                    </span>
+                </div>
             </div>
         </div>
     );

@@ -15,7 +15,7 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy']); // Ha
 // Route untuk Produk (ProductList.jsx)
 Route::get('/products', [ProductController::class, 'index']);      // Ambil semua
 Route::post('/products', [ProductController::class, 'store']);     // Tambah
-Route::put('/products/{id}', [ProductController::class, 'update']); // Edit (Pake POST karena kirim file/gambar)
+Route::match(['post', 'put'], '/products/{id}', [ProductController::class, 'update']); // Edit (Pake POST karena kirim file/gambar)
 Route::delete('/products/{id}', [ProductController::class, 'destroy']); // Hapus
 
 // Route untuk Transaksi (ProductCard.jsx & Transaction.jsx)

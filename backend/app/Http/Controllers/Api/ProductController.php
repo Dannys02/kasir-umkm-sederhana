@@ -23,7 +23,7 @@ class ProductController extends Controller
       "name" => "required",
       "price" => "required|numeric",
       "stock" => "required|numeric",
-      "image" => "nullable|image|max:10240",
+      "image" => "nullable|image|max:2000",
     ]);
 
     if ($request->hasFile("image")) {
@@ -67,26 +67,56 @@ class ProductController extends Controller
   public function update(Request $request, $id)
   {
     $product = Product::findOrFail($id);
-    $data = $request->all();
 
+    // 1. Validasi itu WAJIB supaya gak "anjing" pas gagal
+    $validated = $request->validate([
+      "category_id" => "required",
+      "name" => "required",
+      "price" => "required|numeric",
+      "stock" => "required|numeric",
+      "image" => "nullable|image|max:2000", // Konsisten 2MB
+    ]);
+
+    // 2. Ambil data teks saja dulu
+    $data = $request->only(["category_id", "name", "price", "stock"]);
+
+    // 3. Logika Gambar
     if ($request->hasFile("image")) {
-      if ($product->image) {
-        Storage::disk("public")->delete($product->image);
+      try {
+        // Hapus yang lama biar gak nyampah di Termux
+        if ($product->image) {
+          Storage::disk("public")->delete($product->image);
+        }
+
+        $file = $request->file("image");
+        $filename = time() . "_" . $file->getClientOriginalName();
+
+        // Pake Image Manager biar enteng
+        $manager = new \Intervention\Image\ImageManager(
+          new \Intervention\Image\Drivers\Gd\Driver()
+        );
+        $img = $manager->read($file);
+        $img->scale(width: 800);
+
+        $path = "products/" . $filename;
+        Storage::disk("public")->put(
+          $path,
+          (string) $img->encodeByExtension(
+            $file->getClientOriginalExtension(),
+            quality: 70
+          )
+        );
+
+        $data["image"] = $path;
+      } catch (\Exception $e) {
+        // Backup kalau Intervention gagal
+        $data["image"] = $request->file("image")->store("products", "public");
       }
-
-      $file = $request->file("image");
-      $filename = time() . "." . $file->getClientOriginalExtension();
-
-      // PROSES KOMPRES LAGI
-      $img = Image::read($file);
-      $img->scale(width: 800);
-
-      $path = "products/" . $filename;
-      Storage::disk("public")->put($path, (string) $img->encode());
-      $data["image"] = $path;
     }
 
+    // 4. Update hanya data yang berubah
     $product->update($data);
+
     return response()->json([
       "success" => true,
       "data" => $product->load("category"),
@@ -96,10 +126,11 @@ class ProductController extends Controller
   public function destroy($id)
   {
     $product = Product::findOrFail($id);
+    $product->delete();
+
     if ($product->image) {
       Storage::disk("public")->delete($product->image);
     }
-    $product->delete();
     return response()->json(["success" => true]);
   }
 }
