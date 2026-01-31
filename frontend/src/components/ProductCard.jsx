@@ -106,18 +106,6 @@ export default function ProductCard({
                             </div>
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-[40px]">
                                 {filteredProducts.map(item => {
-                                    // --- LOGIKA STOK REAL-TIME ---
-                                    const itemInCart = cart.find(
-                                        c => c.id === item.id
-                                    );
-                                    const qtyInCart = itemInCart
-                                        ? itemInCart.qty
-                                        : 0;
-                                    const sisaStokTampil =
-                                        item.stock - qtyInCart;
-                                    const isOutOfStock = sisaStokTampil <= 0;
-                                    // -----------------------------
-
                                     return (
                                         <div
                                             key={item.id}
@@ -132,36 +120,16 @@ export default function ProductCard({
                                                             : "https://via.placeholder.com/300"
                                                     }
                                                     alt={item.name}
-                                                    loading="lazy" // Biar gak ngerender gambar yang belum keliatan
-                                                    decoding="async" // Biar gak nahan main thread animasi (hamburger menu)
-                                                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${
-                                                        isOutOfStock
-                                                            ? "grayscale opacity-50"
-                                                            : ""
-                                                    }`}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110`}
                                                 />
-                                                {isOutOfStock && (
-                                                    <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex items-center justify-center">
-                                                        <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                                                            Habis
-                                                        </span>
-                                                    </div>
-                                                )}
                                             </div>
-                                            <div className="p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h2 className="text-sm font-semibold text-gray-700 truncate flex-1">
+                                            <div className="px-4 pt-2">
+                                                <div className="flex justify-between items-start">
+                                                    <h2 className="text-sm font-semibold text-gray-700  flex-1">
                                                         {item.name}
                                                     </h2>
-                                                    <span
-                                                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                                                            sisaStokTampil < 5
-                                                                ? "bg-orange-50 text-orange-600"
-                                                                : "bg-green-50 text-green-600"
-                                                        }`}
-                                                    >
-                                                        Sisa: {sisaStokTampil}
-                                                    </span>
                                                 </div>
                                                 <p className="text-lg font-bold text-orange-600 mb-4">
                                                     Rp{" "}
@@ -169,38 +137,58 @@ export default function ProductCard({
                                                         "id-ID"
                                                     )}
                                                 </p>
-                                                <div className="flex items-center gap-2">
+                                            </div>
+                                            <div className="flex items-center gap-2 pb-2 px-2">
+                                                {cart.find(
+                                                    c => c.id === item.id
+                                                ) ? (
+                                                    <div className="w-full flex items-center justify-between bg-orange-50 p-1 rounded-xl border border-orange-100">
+                                                        <button
+                                                            onClick={() =>
+                                                                removeFromCart(
+                                                                    item.id
+                                                                )
+                                                            }
+                                                            className="w-10 h-10 flex items-center justify-center bg-white text-orange-600 rounded-lg shadow-sm hover:bg-red-100 hover:text-red-600 transition-all"
+                                                        >
+                                                            <X
+                                                                size={16}
+                                                                strokeWidth={3}
+                                                            />
+                                                        </button>
+
+                                                        <span className="font-black text-orange-600">
+                                                            {
+                                                                cart.find(
+                                                                    c =>
+                                                                        c.id ===
+                                                                        item.id
+                                                                ).qty
+                                                            }
+                                                        </span>
+
+                                                        <button
+                                                            onClick={() => addToCart(item)}
+                                                            className="w-10 h-10 flex items-center justify-center bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 transition-all"
+                                                        >
+                                                            <span className="text-lg">
+                                                                +
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                ) : (
                                                     <button
                                                         onClick={() =>
                                                             addToCart(item)
                                                         }
-                                                        disabled={isOutOfStock}
-                                                        className={`w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                                                            !isOutOfStock
-                                                                ? "bg-orange-600 text-white hover:bg-orange-700 shadow-lg shadow-orange-100"
-                                                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                        }`}
+                                                        className="w-full flex items-center justify-center gap-2 text-white bg-orange-600 py-3 rounded-xl text-sm font-bold hover:bg-orange-700 transition-all shadow-md active:scale-95"
                                                     >
                                                         <ShoppingCart
                                                             size={16}
                                                         />
-                                                        {isOutOfStock
-                                                            ? "Habis"
-                                                            : "Keranjang"}
+                                                        <span>Tambah</span>
                                                     </button>
-                                                    {qtyInCart > 0 && (
-                                                        <button
-                                                            onClick={() =>
-                                                                removeFromCart(
-                                                                    item
-                                                                )
-                                                            }
-                                                            className="flex items-center justify-center w-10 h-10 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition-all font-bold"
-                                                        >
-                                                            —
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     );

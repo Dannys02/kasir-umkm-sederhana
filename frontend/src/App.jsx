@@ -17,6 +17,8 @@ function App() {
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     // Fungsi Ambil Data dari Laravel
     const fetchData = async () => {
@@ -63,15 +65,22 @@ function App() {
         });
     };
 
-    const removeFromCart = product => {
-        setCart(prev => {
-            const isExist = prev.find(item => item.id === product.id);
-            if (!isExist) return prev;
-            if (isExist.qty === 1)
-                return prev.filter(item => item.id !== product.id);
-            return prev.map(item =>
-                item.id === product.id ? { ...item, qty: item.qty - 1 } : item
-            );
+    const removeFromCart = productId => {
+        setCart(prevCart => {
+            // Cari barangnya
+            const existingItem = prevCart.find(item => item.id === productId);
+
+            if (existingItem.qty > 1) {
+                // Kalau qty lebih dari 1, kurangi 1
+                return prevCart.map(item =>
+                    item.id === productId
+                        ? { ...item, qty: item.qty - 1 }
+                        : item
+                );
+            } else {
+                // Kalau qty tinggal 1, tendang dari keranjang
+                return prevCart.filter(item => item.id !== productId);
+            }
         });
     };
 
@@ -110,6 +119,9 @@ function App() {
                                 setProducts={setProducts}
                                 categories={categories}
                                 fetchData={fetchData}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                itemsPerPage={itemsPerPage}
                             />
                         }
                     />
@@ -122,6 +134,9 @@ function App() {
                                 categories={categories}
                                 products={products}
                                 fetchData={fetchData}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                itemsPerPage={itemsPerPage}
                             />
                         }
                     />
@@ -132,6 +147,9 @@ function App() {
                                 loading={loading}
                                 setLoading={setLoading}
                                 transactions={transactions}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                itemsPerPage={itemsPerPage}
                             />
                         }
                     />

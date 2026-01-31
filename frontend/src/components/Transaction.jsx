@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { Clock, Tag, ShoppingBag, ArrowRight, ArrowLeft, TrendingUp } from "lucide-react";
 
-export default function Transaction({ loading, transactions }) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
-
+export default function Transaction({ loading, transactions, currentPage, setCurrentPage, itemsPerPage }) {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -63,7 +60,7 @@ export default function Transaction({ loading, transactions }) {
                     </div>
                     <div>
                         <p className="text-xs text-gray-400 font-medium">Terlaris (Top Seller)</p>
-                        <p className="text-xl font-black text-red-800 truncate max-w-[150px]">{topProduct[0]}</p>
+                        <p className="text-xl font-black text-gray-800 max-w-[150px]">{topProduct[0]}</p>
                     </div>
                 </div>
             </div>
@@ -86,9 +83,9 @@ export default function Transaction({ loading, transactions }) {
                             <div key={tx.id} className="group flex flex-col md:flex-row md:items-center justify-between p-5 bg-gray-50 rounded-2xl hover:bg-orange-50/50 transition-all border border-transparent hover:border-orange-100">
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-mono font-bold bg-white text-gray-400 px-2 py-0.5 rounded border border-gray-200 uppercase">
+                                        {/*<span className="text-[10px] font-mono font-bold bg-white text-gray-400 px-2 py-0.5 rounded border border-gray-200 uppercase">
                                             {tx.reference_no}
-                                        </span>
+                                        </span>*/}
                                         <span className="text-[10px] text-gray-400 font-medium uppercase">
                                             {new Date(tx.created_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </span>
@@ -99,7 +96,7 @@ export default function Transaction({ loading, transactions }) {
                                 </div>
                                 
                                 <div className="mt-3 md:mt-0 flex items-center justify-between md:justify-end gap-6">
-                                    <div className="text-right">
+                                    <div className="w-fit">
                                         <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Bayar</p>
                                         <p className="font-black text-orange-600 text-lg">Rp {tx.total_price.toLocaleString("id-ID")}</p>
                                     </div>

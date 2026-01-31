@@ -22,8 +22,7 @@ class ProductController extends Controller
       "category_id" => "required",
       "name" => "required",
       "price" => "required|numeric",
-      "stock" => "required|numeric",
-      "image" => "nullable|image|max:2000",
+      "image" => "required|image|max:2000",
     ]);
 
     if ($request->hasFile("image")) {
@@ -73,7 +72,6 @@ class ProductController extends Controller
       "category_id" => "required",
       "name" => "required",
       "price" => "required|numeric",
-      "stock" => "required|numeric",
       "image" => "nullable|image|max:2000", // Konsisten 2MB
     ]);
 

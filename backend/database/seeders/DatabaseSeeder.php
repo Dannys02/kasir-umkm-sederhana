@@ -26,18 +26,40 @@ class DatabaseSeeder extends Seeder
     // 2. Buat Produk (Ayam Dada & Teh)
     Product::create([
       "category_id" => $makanan->id,
-      "name" => "Ayam Geprek Dada",
+      "name" => "Nasi + Ayam Dada",
       "price" => 10000,
-      "stock" => 10,
       "image" => "products/NasiGeprek.jpg", // Nanti bisa upload via dashboard
     ]);
+    
+    Product::create([
+      "category_id" => $makanan->id,
+      "name" => "Nasi + Ayam Paha",
+      "price" => 10000,
+      "image" => "products/NasiAyamPaha.jpeg", // Nanti bisa upload via dashboard
+    ]);
+    
+    Product::create([
+      "category_id" => $makanan->id,
+      "name" => "Ayam Paha",
+      "price" => 8000,
+      "image" => "products/AyamDadaGeprekOnly.png", // Nanti bisa upload via dashboard
+    ]);
+    
 
     Product::create([
       "category_id" => $minuman->id,
       "name" => "Teh Manis",
       "price" => 5000,
-      "stock" => 20,
       "image" => "products/TehManis.jpeg",
     ]);
+    
+    Product::create([
+      "category_id" => $minuman->id,
+      "name" => "Es Jeruk",
+      "price" => 5000,
+      "image" => "products/EsJeruk.jpeg",
+    ]);
+    
+    
   }
 }

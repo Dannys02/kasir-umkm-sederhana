@@ -26,39 +26,24 @@ class TransactionController extends Controller
 
   // CREATE: Proses Checkout (handleConfirm di React)
   public function store(Request $request)
-  {
-    // $request->cart berisi array belanjaan dari React
+{
     return DB::transaction(function () use ($request) {
-      // 1. Simpan Header
-      $transaction = Transaction::create([
-        "reference_no" => "TRX-" . strtoupper(Str::random(8)),
-        "total_price" => $request->total_price,
-      ]);
-
-      // 2. Simpan Detail & Kurangi Stok
-      foreach ($request->cart as $item) {
-        $product = Product::findOrFail($item["id"]);
-
-        // Cek stok lagi buat jaga-jaga
-        if ($product->stock < $item["qty"]) {
-          throw new \Exception("Stok {$product->name} tidak cukup!");
+        $transaction = Transaction::create([
+            "reference_no" => "TRX-" . strtoupper(Str::random(8)),
+            "total_price" => $request->total_price,
+        ]);
+        
+        foreach ($request->cart as $item) {
+            $transaction->details()->create([
+                "product_id" => $item["id"],
+                "product_name" => $item["name"], // Pastikan dari React kirim nama juga
+                "qty" => $item["qty"],
+                "price_at_buy" => $item["price"],
+            ]);
         }
 
-        $transaction->details()->create([
-          "product_id" => $product->id,
-          "product_name" => $product->name,
-          "qty" => $item["qty"],
-          "price_at_buy" => $product->price,
-        ]);
-
-        // Potong stok di database
-        $product->decrement("stock", $item["qty"]);
-      }
-
-      return response()->json([
-        "success" => true,
-        "message" => "Transaksi Berhasil!",
-      ]);
+        return response()->json(["success" => true]);
     });
-  }
+}
+
 }

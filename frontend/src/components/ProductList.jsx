@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Image as ImageIcon, X } from "lucide-react";
+import { ArrowRight, ArrowLeft, Plus, Edit2, Trash2, Image as ImageIcon, X } from "lucide-react";
 import axios from "axios";
 
 export default function ProductList({
     loading,
     products,
     categories,
-    fetchData
+    fetchData,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage
 }) {
     const [form, setForm] = useState({
         id: null,
         name: "",
         category_id: "",
-        price: "",
-        stock: ""
+        price: ""
     });
 
     const [successModal, setSuccessModal] = useState(false);
@@ -42,7 +44,6 @@ export default function ProductList({
         data.append("name", form.name);
         data.append("category_id", form.category_id);
         data.append("price", form.price);
-        data.append("stock", form.stock);
 
         if (imageFile) {
             data.append("image", imageFile);
@@ -74,20 +75,20 @@ export default function ProductList({
             // Auto close modal setelah 3 detik
             setTimeout(() => setSuccessModal(false), 3000);
         } catch (error) {
-    // Lihat di Inspect > Console > Network Tab
-    console.error("Penyakitnya adalah:", error.response?.data); 
-    
-    // Ambil pesan error dari Laravel kalau ada
-    const errorMessage = error.response?.data?.message || "Gagal Memproses Data!";
-    setModalMessage(errorMessage);
-    setErrorModal(true);
-    setTimeout(() => setErrorModal(false), 3000);
-}
+            // Lihat di Inspect > Console > Network Tab
+            console.error("Penyakitnya adalah:", error.response?.data);
 
+            // Ambil pesan error dari Laravel kalau ada
+            const errorMessage =
+                error.response?.data?.message || "Gagal Memproses Data!";
+            setModalMessage(errorMessage);
+            setErrorModal(true);
+            setTimeout(() => setErrorModal(false), 3000);
+        }
     };
 
     const resetForm = () => {
-        setForm({ id: null, name: "", category_id: "", price: "", stock: "" });
+        setForm({ id: null, name: "", category_id: "", price: "" });
         setImageFile(null);
         setPreviewUrl(null);
         setIsEdit(false);
@@ -98,8 +99,7 @@ export default function ProductList({
             id: p.id,
             name: p.name,
             category_id: p.category_id,
-            price: p.price,
-            stock: p.stock
+            price: p.price
         });
         // Kalau edit, kasih preview gambar yang lama dulu
         setPreviewUrl(p.image ? STORAGE_URL + p.image : null);
@@ -122,6 +122,12 @@ export default function ProductList({
             }
         }
     };
+
+    // --- LOGIKA PAGINATION ---
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(products.length / itemsPerPage);
 
     return (
         <div className="max-w-7xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-orange-50">
@@ -165,15 +171,6 @@ export default function ProductList({
                     className="p-3 rounded-xl border border-gray-200"
                     value={form.price}
                     onChange={e => setForm({ ...form, price: e.target.value })}
-                    required
-                />
-
-                <input
-                    type="number"
-                    placeholder="Stok"
-                    className="p-3 rounded-xl border border-gray-200"
-                    value={form.stock}
-                    onChange={e => setForm({ ...form, stock: e.target.value })}
                     required
                 />
 
@@ -240,7 +237,6 @@ export default function ProductList({
                             </th>
                             <th className="py-4 px-6 font-medium">Kategori</th>
                             <th className="py-4 px-6 font-medium">Harga</th>
-                            <th className="py-4 px-6 font-medium">Stok</th>
                             <th className="py-4 px-6 font-medium text-center">
                                 Aksi
                             </th>
@@ -258,11 +254,16 @@ export default function ProductList({
                                     </div>
                                 </td>
                             </tr>
+                        ) : products.length === 0 ? (
+                            <td
+                                colSpan="6"
+                                className="text-gray-400 text-center py-6"
+                            >
+                                {" "}
+                                Tidak ada data produk.
+                            </td>
                         ) : (
-                            products.length === 0 ? (
-                            <td colSpan="6" className="text-gray-400 text-center py-6"> Tidak ada data produk.</td>
-                            ) : (
-                            products.map(p => (
+                            currentProducts.map(p => (
                                 <tr
                                     key={p.id}
                                     className="border-b border-gray-50 hover:bg-gray-50/50 transition-all"
@@ -289,9 +290,6 @@ export default function ProductList({
                                     <td className="py-4 px-6 text-orange-600 font-bold">
                                         Rp {p.price.toLocaleString("id-ID")}
                                     </td>
-                                    <td className="py-4 px-6 text-gray-500">
-                                        {p.stock}
-                                    </td>
                                     <td className="py-4 px-6 text-center">
                                         <div className="flex justify-center gap-2">
                                             <button
@@ -312,10 +310,42 @@ export default function ProductList({
                                     </td>
                                 </tr>
                             ))
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
+
+            {/* --- PAGINATION CONTROL --- */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-xl bg-gray-100 text-gray-500 disabled:opacity-50 hover:bg-orange-100 hover:text-orange-600 transition-all"
+                    >
+                        <ArrowLeft size={20} />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                        <span className="text-sm font-bold text-gray-800 bg-orange-50 px-3 py-1 rounded-lg border border-orange-100">
+                            {currentPage}
+                        </span>
+                        <span className="text-sm font-medium text-gray-400">
+                            dari {totalPages}
+                        </span>
+                    </div>
+
+                    <button
+                        onClick={() =>
+                            setCurrentPage(p => Math.min(totalPages, p + 1))
+                        }
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-xl bg-gray-800 text-white disabled:opacity-50 hover:bg-orange-600 transition-all shadow-md"
+                    >
+                        <ArrowRight size={20} />
+                    </button>
+                </div>
+            )}
 
             {/* Modal Berhasil */}
             <div

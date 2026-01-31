@@ -22,9 +22,8 @@ return new class extends Migration {
         ->constrained()
         ->onDelete("cascade");
       $table->string("name");
-      $table->string("image")->nullable(); // Untuk URL/Path gambar
+      $table->string("image"); // Untuk URL/Path gambar
       $table->integer("price");
-      $table->integer("stock");
       $table->timestamps();
     });
 
