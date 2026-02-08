@@ -111,7 +111,7 @@ export default function ProductList({
         if (confirm("Hapus produk ini?")) {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/products/${id}`);
-                setModalMessage("Produk Berhasil Dihapus!");
+                setModalMessage("Produk Berhasil Dihapus. Silakan refresh!");
                 setSuccessModal(true);
                 fetchData();
                 setTimeout(() => setSuccessModal(false), 3000);

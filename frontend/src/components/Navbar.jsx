@@ -7,7 +7,7 @@ export default function Navbar() {
     const location = useLocation();
 
     const menuItems = [
-        { name: "Dashboard", to: "/", icon: <LayoutDashboard size={18} /> },
+        { name: "Dashboard", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
         {
             name: "Daftar Produk",
             to: "/daftar-produk",

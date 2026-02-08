@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ProductCard from "./components/ProductCard";
 import ProductList from "./components/ProductList";
@@ -89,8 +90,9 @@ function App() {
             <Navbar />
             <div className="bg-gray-50 p-6 font-sans">
                 <Routes>
+                  <Route path="/" element={<Login />} />
                     <Route
-                        path="/"
+                        path="/dashboard"
                         element={
                             <ProductCard
                                 loading={loading}

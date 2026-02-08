@@ -30,16 +30,12 @@ class ProductController extends Controller
         $file = $request->file("image");
         $filename = time() . "_" . $file->getClientOriginalName();
 
-        // Inisialisasi Image Manager (Intervention V3)
         $manager = new \Intervention\Image\ImageManager(
           new \Intervention\Image\Drivers\Gd\Driver()
         );
+        
         $img = $manager->read($file);
-
-        // Resize ke lebar 800px (tinggi proporsional)
         $img->scale(width: 800);
-
-        // Simpan hasil kompresi ke folder products
         $path = "products/" . $filename;
         Storage::disk("public")->put(
           $path,
