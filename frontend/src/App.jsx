@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, useLocation, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ProductCard from "./components/ProductCard";
@@ -20,6 +20,7 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+    const location = useLocation();
 
     // Fungsi Ambil Data dari Laravel
     const fetchData = async () => {
@@ -85,76 +86,104 @@ function App() {
         });
     };
 
+    const ProtectedRoute = ({ children }) => {
+        const token = localStorage.getItem("token");
+        if (!token) return <Navigate to="/" replace />;
+        return children;
+    };
+
+    const PublicRoute = ({ children }) => {
+        const token = localStorage.getItem("token");
+        if (token) return <Navigate to="/dashboard" replace />;
+        return children;
+    };
+
     return (
         <>
-            <Navbar />
+            {location.pathname != "/" && <Navbar />}
             <div className="bg-gray-50 p-6 font-sans">
                 <Routes>
-                  <Route path="/" element={<Login />} />
+                    <Route
+                        path="/"
+                        element={
+                            <PublicRoute>
+                                <Login />
+                            </PublicRoute>
+                        }
+                    />
                     <Route
                         path="/dashboard"
                         element={
-                            <ProductCard
-                                loading={loading}
-                                setLoading={setLoading}
-                                products={products}
-                                categories={categories}
-                                transactions={transactions}
-                                setTransactions={setTransactions}
-                                cart={cart}
-                                setCart={setCart}
-                                addToCart={addToCart}
-                                removeFromCart={removeFromCart}
-                                revenue={revenue}
-                                setRevenue={setRevenue}
-                                fetchData={fetchData} // <--- Kirim ini buat refresh data
-                            />
+                            <ProtectedRoute>
+                                <ProductCard
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    products={products}
+                                    categories={categories}
+                                    transactions={transactions}
+                                    setTransactions={setTransactions}
+                                    cart={cart}
+                                    setCart={setCart}
+                                    addToCart={addToCart}
+                                    removeFromCart={removeFromCart}
+                                    revenue={revenue}
+                                    setRevenue={setRevenue}
+                                    fetchData={fetchData} // <--- Kirim ini buat refresh data
+                                />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/daftar-produk"
                         element={
-                            <ProductList
-                                loading={loading}
-                                setLoading={setLoading}
-                                products={products}
-                                setProducts={setProducts}
-                                categories={categories}
-                                fetchData={fetchData}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                itemsPerPage={itemsPerPage}
-                            />
+                            <ProtectedRoute>
+                                <ProductList
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    products={products}
+                                    setProducts={setProducts}
+                                    categories={categories}
+                                    fetchData={fetchData}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    itemsPerPage={itemsPerPage}
+                                />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/daftar-kategori"
                         element={
-                            <CategoryList
-                                loading={loading}
-                                setLoading={setLoading}
-                                categories={categories}
-                                products={products}
-                                fetchData={fetchData}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                itemsPerPage={itemsPerPage}
-                            />
+                            <ProtectedRoute>
+                                <CategoryList
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    categories={categories}
+                                    products={products}
+                                    fetchData={fetchData}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    itemsPerPage={itemsPerPage}
+                                />
+                            </ProtectedRoute>
                         }
                     />
                     <Route
                         path="/riwayat-transaksi"
                         element={
-                            <Transaction
-                                loading={loading}
-                                setLoading={setLoading}
-                                transactions={transactions}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                itemsPerPage={itemsPerPage}
-                            />
+                            <ProtectedRoute>
+                                <Transaction
+                                    loading={loading}
+                                    setLoading={setLoading}
+                                    transactions={transactions}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    itemsPerPage={itemsPerPage}
+                                />
+                            </ProtectedRoute>
                         }
                     />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </div>
         </>

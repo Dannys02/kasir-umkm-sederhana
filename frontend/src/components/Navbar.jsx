@@ -1,28 +1,38 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, History, Tags, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, ShoppingBag, History, Tags, Menu, X, LogOut, User } from "lucide-react";
+import axios from "axios";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    
+    // Ambil nama dari localStorage (Cara mudah yang kita bahas tadi)
+    const userName = localStorage.getItem("userName") || "KASIR";
+
+    const handleLogout = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            // Memberitahu Laravel untuk hapus token di database
+            await axios.post("http://127.0.0.1:8000/api/logout", {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (error) {
+            console.error("Logout API error, but cleaning local storage anyway.");
+        } finally {
+            // Bersihkan storage dan tendang ke halaman login
+            localStorage.removeItem("token");
+            localStorage.removeItem("userName");
+            navigate("/"); 
+        }
+    };
 
     const menuItems = [
         { name: "Dashboard", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
-        {
-            name: "Daftar Produk",
-            to: "/daftar-produk",
-            icon: <ShoppingBag size={18} />
-        },
-        {
-            name: "Daftar Kategori",
-            to: "/daftar-kategori",
-            icon: <Tags size={18} />
-        },
-        {
-            name: "Riwayat Transaksi",
-            to: "/riwayat-transaksi",
-            icon: <History size={18} />
-        }
+        { name: "Daftar Produk", to: "/daftar-produk", icon: <ShoppingBag size={18} /> },
+        { name: "Daftar Kategori", to: "/daftar-kategori", icon: <Tags size={18} /> },
+        { name: "Riwayat Transaksi", to: "/riwayat-transaksi", icon: <History size={18} /> }
     ];
 
     return (
@@ -32,7 +42,7 @@ export default function Navbar() {
                     {/* Logo Section */}
                     <div className="flex items-center">
                         <div className="flex-shrink-0 flex items-center gap-2">
-                            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center shadow-indigo-200 shadow-lg">
+                            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center shadow-lg">
                                 <ShoppingBag className="text-white" size={20} />
                             </div>
                             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-800">
@@ -42,29 +52,40 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center space-x-4">
+                    <div className="hidden md:flex items-center space-x-2">
                         {menuItems.map(item => (
                             <Link
                                 key={item.name}
                                 to={item.to}
-                                className={`flex items-center gap-2 px-4 py-2
-                                rounded-xl text-sm font-medium text-gray-500
-                                hover:text-orange-600 hover:bg-orange-50
-                                ${
-                                    location.pathname === item.to
-                                        ? "text-orange-600 bg-orange-50"
-                                        : "text-black bg-transparent"
-                                }
-                                transition-all duration-500 ease-in-out`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300
+                                ${location.pathname === item.to 
+                                    ? "text-orange-600 bg-orange-50 shadow-sm" 
+                                    : "text-gray-600 hover:bg-gray-50 hover:text-orange-600"}`}
                             >
                                 {item.icon}
                                 {item.name}
                             </Link>
                         ))}
-                        <div className="ml-4 pl-4 border-l border-gray-100">
-                            <div className="w-8 h-8 rounded-full bg-orange-100 border border-indigo-200 flex items-center justify-center text-orange-600 text-xs font-bold">
-                                AD
+
+                        {/* User Info & Logout Button */}
+                        <div className="ml-4 pl-4 border-l border-gray-200 flex items-center gap-4">
+                            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                                <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white">
+                                    <User size={14} />
+                                </div>
+                                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    {userName}
+                                </span>
                             </div>
+                            
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                title="Keluar Aplikasi"
+                            >
+                                <LogOut size={18} />
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
 
@@ -81,22 +102,35 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu - Dropdown */}
-            <div
-                className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white border-b border-gray-100 
-        ${isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"}`}
-            >
+            <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white border-b border-gray-100 
+                ${isOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
                 <div className="px-4 pt-2 pb-6 space-y-1">
+                    {/* User Profile Mobile */}
+                    <div className="flex items-center gap-3 px-4 py-3 mb-2 border-b border-gray-50">
+                        <User size={20} className="text-orange-500" />
+                        <span className="font-bold text-gray-800">{userName}</span>
+                    </div>
+
                     {menuItems.map(item => (
                         <Link
                             onClick={() => setIsOpen(false)}
                             key={item.name}
                             to={item.to}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-all"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50"
                         >
                             <span className="text-orange-500">{item.icon}</span>
                             {item.name}
                         </Link>
                     ))}
+                    
+                    {/* Logout Mobile */}
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-red-600 hover:bg-red-50 transition-all"
+                    >
+                        <LogOut size={20} />
+                        Logout
+                    </button>
                 </div>
             </div>
         </nav>

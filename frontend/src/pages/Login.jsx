@@ -1,28 +1,35 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    {/*const handleLogin = async e => {
+    const handleLogin = async e => {
         e.preventDefault();
+        setError("");
         try {
             const response = await axios.post(
-                "http://localhost:8000/api/login",
+                "http://127.0.0.1:8000/api/login",
                 {
                     email,
                     password
                 }
             );
-            // Simpan token dan redirect ke dashboard
-            localStorage.setItem("token", response.data.token);
-            window.location.href = "/dashboard";
+
+            // Simpan token yang dikirim dari controller tadi
+            if (response.data.token) {
+                localStorage.setItem("token", response.data.token);
+                navigate("/dashboard");
+            }
         } catch (err) {
-            setError("Email atau password salah, Sobat.");
+            setError("Email atau password salah.");
         }
-    };*/}
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -37,7 +44,7 @@ const Login = () => {
                     </p>
                 )}
 
-                <form className="space-y-6">
+                <form onSubmit={handleLogin} className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
                             Email Address
