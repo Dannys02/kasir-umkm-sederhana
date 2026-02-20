@@ -26,13 +26,14 @@ function App() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const resProd = await axios.get(`${API_URL}/products`);
+            const [resProd, resCat, resTrx] = await Promise.all([
+                axios.get(`${API_URL}/products`),
+                axios.get(`${API_URL}/categories`),
+                axios.get(`${API_URL}/transactions`)
+            ]);
+
             setProducts(resProd.data.data || []);
-
-            const resCat = await axios.get(`${API_URL}/categories`);
             setCategories(resCat.data.data || []);
-
-            const resTrx = await axios.get(`${API_URL}/transactions`);
             setTransactions(resTrx.data.data || []);
             setRevenue(resTrx.data.total_revenue || 0);
         } catch (error) {
@@ -128,7 +129,7 @@ function App() {
                                     removeFromCart={removeFromCart}
                                     revenue={revenue}
                                     setRevenue={setRevenue}
-                                    fetchData={fetchData} // <--- Kirim ini buat refresh data
+                                    fetchData={fetchData}
                                 />
                             </ProtectedRoute>
                         }

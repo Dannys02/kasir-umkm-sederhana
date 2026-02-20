@@ -317,35 +317,26 @@ export default function ProductList({
 
             {/* --- PAGINATION CONTROL --- */}
             {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                    <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="p-2 rounded-xl bg-gray-100 text-gray-500 disabled:opacity-50 hover:bg-orange-100 hover:text-orange-600 transition-all"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-
-                    <div className="flex items-center gap-1">
-                        <span className="text-sm font-bold text-gray-800 bg-orange-50 px-3 py-1 rounded-lg border border-orange-100">
-                            {currentPage}
-                        </span>
-                        <span className="text-sm font-medium text-gray-400">
-                            dari {totalPages}
-                        </span>
-                    </div>
-
-                    <button
-                        onClick={() =>
-                            setCurrentPage(p => Math.min(totalPages, p + 1))
-                        }
-                        disabled={currentPage === totalPages}
-                        className="p-2 rounded-xl bg-gray-800 text-white disabled:opacity-50 hover:bg-orange-600 transition-all shadow-md"
-                    >
-                        <ArrowRight size={20} />
-                    </button>
-                </div>
-            )}
+                            <div className="flex justify-center items-center gap-2 mt-8">
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 text-sm font-bold rounded-xl bg-gray-100 text-gray-500 disabled:opacity-50"
+                                >
+                                    <ArrowLeft size={24} />
+                                </button>
+                                <span className="text-sm font-bold text-gray-400 px-4">
+                                    Halaman {currentPage} dari {totalPages}
+                                </span>
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 text-sm font-bold rounded-xl bg-gray-800 text-white disabled:opacity-50"
+                                >
+                                    <ArrowRight size={24} />
+                                </button>
+                            </div>
+                        )}
 
             {/* Modal Berhasil */}
             <div

@@ -69,14 +69,6 @@ export default function Navbar() {
 
                         {/* User Info & Logout Button */}
                         <div className="ml-4 pl-4 border-l border-gray-200 flex items-center gap-4">
-                            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-                                <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-white">
-                                    <User size={14} />
-                                </div>
-                                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    {userName}
-                                </span>
-                            </div>
                             
                             <button
                                 onClick={handleLogout}
@@ -105,12 +97,6 @@ export default function Navbar() {
             <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white border-b border-gray-100 
                 ${isOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
                 <div className="px-4 pt-2 pb-6 space-y-1">
-                    {/* User Profile Mobile */}
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2 border-b border-gray-50">
-                        <User size={20} className="text-orange-500" />
-                        <span className="font-bold text-gray-800">{userName}</span>
-                    </div>
-
                     {menuItems.map(item => (
                         <Link
                             onClick={() => setIsOpen(false)}

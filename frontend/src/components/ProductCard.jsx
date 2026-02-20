@@ -104,7 +104,7 @@ export default function ProductCard({
                                 </h2>
                                 <div className="h-[2px] flex-1 bg-gradient-to-r from-orange-200 to-transparent"></div>
                             </div>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 py-[40px]">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-[40px]">
                                 {filteredProducts.map(item => {
                                     return (
                                         <div
@@ -168,7 +168,9 @@ export default function ProductCard({
                                                         </span>
 
                                                         <button
-                                                            onClick={() => addToCart(item)}
+                                                            onClick={() =>
+                                                                addToCart(item)
+                                                            }
                                                             className="w-10 h-10 flex items-center justify-center bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 transition-all"
                                                         >
                                                             <span className="text-lg">
